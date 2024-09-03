@@ -4,6 +4,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from injector import inject
 from ..service.ocr_ids_service import OcrIdsService
+import logging
+
+logger = logging.getLogger("ocr-ids-be")
 
 class OcrIdsController(viewsets.ViewSet):
 
@@ -18,6 +21,7 @@ class OcrIdsController(viewsets.ViewSet):
         result = self.ocrIdsService.extract_passport(request_body.get("image"))
 
         if result:
+            logger.info(result);
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({"error": "failed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -28,6 +32,7 @@ class OcrIdsController(viewsets.ViewSet):
         result = self.ocrIdsService.extract_ktp(request_body.get("image"))
 
         if result:
+            logger.info(result);
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({"error": "failed"}, status=status.HTTP_400_BAD_REQUEST)
@@ -38,6 +43,7 @@ class OcrIdsController(viewsets.ViewSet):
         result = self.ocrIdsService.extract_sim(request_body.get("image"))
 
         if result:
+            logger.info(result);
             return Response(result, status=status.HTTP_200_OK)
         else:
             return Response({"error": "failed"}, status=status.HTTP_400_BAD_REQUEST)
