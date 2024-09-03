@@ -82,13 +82,13 @@ class ExtractTextService:
             image_data = base64.b64decode(imageBase64)
             image = Image.open(BytesIO(image_data))
             image_np = np.array(image)
-            preprocessed_image = self._lightweight_preprocess(
-                image_np, w_threshold=w_threshold
-            )
+            # preprocessed_image = self._lightweight_preprocess(
+            #     image_np, w_threshold=w_threshold
+            # )
 
             try:
                 return self._get_horizontal_lines(
-                    results=self.ocr_model.ocr(preprocessed_image, cls=True),
+                    results=self.ocr_model.ocr(image_np, cls=True),
                     height_threshold=height_threshold,
                     distance_threshold=distance_threshold,
                 )
