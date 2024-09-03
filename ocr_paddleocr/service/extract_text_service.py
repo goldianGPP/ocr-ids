@@ -27,15 +27,6 @@ class ExtractTextService:
         self.lock = threading.Lock()
         logger.info("MrzService instance created")
 
-    def _lightweight_preprocess(self, image, w_threshold=True):
-        try:
-            result = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            if w_threshold:
-                _, result = cv2.threshold(result, 110, 255, cv2.THRESH_BINARY)
-            return result
-        finally:
-            del result
-
     def _get_horizontal_lines(
         self, results, height_threshold=0.5, distance_threshold=50
     ):
@@ -75,6 +66,19 @@ class ExtractTextService:
 
         return lines
 
+    def _lightweight_preprocess(self, image, w_threshold=True):
+        try:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+            gray = clahe.apply(gray)
+            _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            return binary
+        finally:
+            del gray
+            del binary
+            del _
+            del clahe
+
     def extract_from_base64(
         self, imageBase64, w_threshold=True, height_threshold=0.5, distance_threshold=50
     ):
@@ -82,9 +86,9 @@ class ExtractTextService:
             image_data = base64.b64decode(imageBase64)
             image = Image.open(BytesIO(image_data))
             image_np = np.array(image)
-            # preprocessed_image = self._lightweight_preprocess(
-            #     image_np, w_threshold=w_threshold
-            # )
+            preprocessed_image = self._lightweight_preprocess(
+                image_np, w_threshold=w_threshold
+            )
 
             try:
                 return self._get_horizontal_lines(
